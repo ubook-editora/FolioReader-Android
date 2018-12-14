@@ -20,6 +20,7 @@ import android.support.annotation.ColorRes;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.StateSet;
 import android.view.View;
@@ -128,7 +129,6 @@ public class UiUtil {
             textView.setUnderlineWidth(2.0f);
         }
     }
-
 
     private static void setUnderLineColor(UnderlinedTextView underlinedTextView, Context context, int background, int underlinecolor) {
         underlinedTextView.setBackgroundColor(ContextCompat.getColor(context,
@@ -258,7 +258,6 @@ public class UiUtil {
                 Field fieldCenter = drawableFieldClass.getDeclaredField("mSelectHandleCenter");
                 fieldCenter.setAccessible(true);
                 fieldCenter.set(editText, drawableCenter);
-
             } else {
                 // Get the editor
                 Field fieldEditor = TextView.class.getDeclaredField("mEditor");
@@ -283,8 +282,7 @@ public class UiUtil {
         }
     }
 
-    public static StateListDrawable createStateDrawable(@ColorInt int colorSelected,
-                                                        @ColorInt int colorNormal) {
+    public static StateListDrawable createStateDrawable(@ColorInt int colorSelected, @ColorInt int colorNormal) {
         StateListDrawable stateListDrawable = new StateListDrawable();
         stateListDrawable.addState(new int[]{android.R.attr.state_selected}, new ColorDrawable(colorSelected));
         stateListDrawable.addState(StateSet.WILD_CARD, new ColorDrawable(colorNormal));
@@ -309,11 +307,23 @@ public class UiUtil {
     }
 
     public static void setStatusBarColor(Window window, @ColorInt int color) {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
             window.setStatusBarColor(color);
         }
     }
+
+    public static DisplayMetrics findRealSize(Activity activity) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+
+        if (Build.VERSION.SDK_INT >= 17) {
+            activity.getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+        } else {
+            activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        }
+
+        return displayMetrics;
+    }
+
 }

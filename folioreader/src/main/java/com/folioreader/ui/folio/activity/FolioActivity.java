@@ -40,13 +40,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.view.ActionMode;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.ContextMenu;
-import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -90,10 +87,7 @@ import static com.folioreader.Constants.HIGHLIGHT_SELECTED;
 import static com.folioreader.Constants.SELECTED_CHAPTER_POSITION;
 import static com.folioreader.Constants.TYPE;
 
-public class FolioActivity
-        extends AppCompatActivity
-        implements FolioActivityCallback, MediaControllerCallback,
-        View.OnSystemUiVisibilityChangeListener {
+public class FolioActivity extends AppCompatActivity implements FolioActivityCallback, MediaControllerCallback, View.OnSystemUiVisibilityChangeListener {
 
     private static final String LOG_TAG = "FolioActivity";
 
@@ -164,8 +158,8 @@ public class FolioActivity
             Log.v(LOG_TAG, "-> closeBroadcastReceiver -> onReceive -> " + intent.getAction());
 
             String action = intent.getAction();
-            if (action != null && action.equals(FolioReader.ACTION_CLOSE_FOLIOREADER)) {
 
+            if (action != null && action.equals(FolioReader.ACTION_CLOSE_FOLIOREADER)) {
                 try {
                     ActivityManager activityManager = (ActivityManager)
                             context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -192,8 +186,8 @@ public class FolioActivity
         Log.v(LOG_TAG, "-> onNewIntent");
 
         String action = getIntent().getAction();
-        if (action != null && action.equals(FolioReader.ACTION_CLOSE_FOLIOREADER)) {
 
+        if (action != null && action.equals(FolioReader.ACTION_CLOSE_FOLIOREADER)) {
             if (topActivity == null || !topActivity) {
                 // FolioActivity was already left, so no need to broadcast ReadPosition again.
                 // Finish activity without going through onPause() and onStop()
@@ -202,14 +196,18 @@ public class FolioActivity
                 // To determine if app in background or foreground
                 boolean appInBackground = false;
                 if (Build.VERSION.SDK_INT < 26) {
-                    if (ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND == taskImportance)
+                    if (ActivityManager.RunningAppProcessInfo.IMPORTANCE_BACKGROUND == taskImportance) {
                         appInBackground = true;
+                    }
                 } else {
-                    if (ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED == taskImportance)
+                    if (ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED == taskImportance) {
                         appInBackground = true;
+                    }
                 }
-                if (appInBackground)
+
+                if (appInBackground) {
                     moveTaskToBack(true);
+                }
             }
         }
     }
@@ -217,10 +215,12 @@ public class FolioActivity
     @Override
     protected void onResume() {
         super.onResume();
+
         Log.v(LOG_TAG, "-> onResume");
         topActivity = true;
 
         String action = getIntent().getAction();
+
         if (action != null && action.equals(FolioReader.ACTION_CLOSE_FOLIOREADER)) {
             // FolioActivity is topActivity, so need to broadcast ReadPosition.
             finish();
@@ -230,6 +230,7 @@ public class FolioActivity
     @Override
     protected void onStop() {
         super.onStop();
+
         Log.v(LOG_TAG, "-> onStop");
         topActivity = false;
     }
@@ -242,12 +243,10 @@ public class FolioActivity
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
 
         handler = new Handler();
-        Display display = getWindowManager().getDefaultDisplay();
-        displayMetrics = getResources().getDisplayMetrics();
-        display.getRealMetrics(displayMetrics);
+        displayMetrics = UiUtil.findRealSize(this);
         density = displayMetrics.density;
-        LocalBroadcastManager.getInstance(this).registerReceiver(closeBroadcastReceiver,
-                new IntentFilter(FolioReader.ACTION_CLOSE_FOLIOREADER));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(closeBroadcastReceiver, new IntentFilter(FolioReader.ACTION_CLOSE_FOLIOREADER));
 
         // Fix for screen get turned off while reading
         // TODO -> Make this configurable
@@ -257,6 +256,7 @@ public class FolioActivity
         initDistractionFreeMode(savedInstanceState);
 
         setContentView(R.layout.folio_activity);
+
         this.savedInstanceState = savedInstanceState;
 
         if (savedInstanceState != null) {
@@ -265,13 +265,12 @@ public class FolioActivity
         }
 
         mBookId = getIntent().getStringExtra(FolioReader.INTENT_BOOK_ID);
-        mEpubSourceType = (EpubSourceType)
-                getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
+        mEpubSourceType = (EpubSourceType) getIntent().getExtras().getSerializable(FolioActivity.INTENT_EPUB_SOURCE_TYPE);
+
         if (mEpubSourceType.equals(EpubSourceType.RAW)) {
             mEpubRawId = getIntent().getExtras().getInt(FolioActivity.INTENT_EPUB_SOURCE_PATH);
         } else {
-            mEpubFilePath = getIntent().getExtras()
-                    .getString(FolioActivity.INTENT_EPUB_SOURCE_PATH);
+            mEpubFilePath = getIntent().getExtras().getString(FolioActivity.INTENT_EPUB_SOURCE_PATH);
         }
 
         initActionBar();
@@ -285,7 +284,6 @@ public class FolioActivity
     }
 
     private void initActionBar() {
-
         appBarLayout = findViewById(R.id.appBarLayout);
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -326,8 +324,7 @@ public class FolioActivity
     public void setDayMode() {
         Log.v(LOG_TAG, "-> setDayMode");
 
-        actionBar.setBackgroundDrawable(
-                new ColorDrawable(ContextCompat.getColor(this, R.color.white)));
+        actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.white)));
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.black));
     }
 
@@ -335,16 +332,14 @@ public class FolioActivity
     public void setNightMode() {
         Log.v(LOG_TAG, "-> setNightMode");
 
-        actionBar.setBackgroundDrawable(
-                new ColorDrawable(ContextCompat.getColor(this, R.color.black)));
+        actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(this, R.color.black)));
         toolbar.setTitleTextColor(ContextCompat.getColor(this, R.color.night_title_text_color));
     }
 
     private void initMediaController() {
         Log.v(LOG_TAG, "-> initMediaController");
 
-        mediaControllerFragment = MediaControllerFragment.
-                getInstance(getSupportFragmentManager(), this);
+        mediaControllerFragment = MediaControllerFragment.getInstance(getSupportFragmentManager(), this);
     }
 
     @Override
@@ -357,8 +352,9 @@ public class FolioActivity
         UiUtil.setColorIntToDrawable(config.getThemeColor(), menu.findItem(R.id.itemConfig).getIcon());
         UiUtil.setColorIntToDrawable(config.getThemeColor(), menu.findItem(R.id.itemTts).getIcon());
 
-        if (!config.isShowTts())
+        if (!config.isShowTts()) {
             menu.findItem(R.id.itemTts).setVisible(false);
+        }
 
         return true;
     }
@@ -373,7 +369,6 @@ public class FolioActivity
             Log.v(LOG_TAG, "-> onOptionsItemSelected -> drawer");
             startContentHighlightActivity();
             return true;
-
         } else if (itemId == R.id.itemSearch) {
             Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.getTitle());
             if (searchUri == null)
@@ -384,12 +379,10 @@ public class FolioActivity
             intent.putExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY, searchQuery);
             startActivityForResult(intent, RequestCode.SEARCH.value);
             return true;
-
         } else if (itemId == R.id.itemConfig) {
             Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.getTitle());
             showConfigBottomSheetDialogFragment();
             return true;
-
         } else if (itemId == R.id.itemTts) {
             Log.v(LOG_TAG, "-> onOptionsItemSelected -> " + item.getTitle());
             showMediaController();
@@ -400,16 +393,16 @@ public class FolioActivity
     }
 
     public void startContentHighlightActivity() {
-
         Intent intent = new Intent(FolioActivity.this, ContentHighlightActivity.class);
-
         intent.putExtra(Constants.PUBLICATION, pubBox.getPublication());
+
         try {
             intent.putExtra(CHAPTER_SELECTED, spine.get(currentChapterIndex).getHref());
         } catch (NullPointerException | IndexOutOfBoundsException e) {
             Log.w(LOG_TAG, "-> ", e);
             intent.putExtra(CHAPTER_SELECTED, "");
         }
+
         intent.putExtra(FolioReader.INTENT_BOOK_ID, mBookId);
         intent.putExtra(Constants.BOOK_TITLE, bookFileName);
 
@@ -418,8 +411,7 @@ public class FolioActivity
     }
 
     public void showConfigBottomSheetDialogFragment() {
-        new ConfigBottomSheetDialogFragment().show(getSupportFragmentManager(),
-                ConfigBottomSheetDialogFragment.LOG_TAG);
+        new ConfigBottomSheetDialogFragment().show(getSupportFragmentManager(), ConfigBottomSheetDialogFragment.LOG_TAG);
     }
 
     public void showMediaController() {
@@ -428,6 +420,7 @@ public class FolioActivity
 
     private void setupBook() {
         Log.v(LOG_TAG, "-> setupBook");
+
         try {
             initBook();
             onBookInitSuccess();
@@ -445,6 +438,7 @@ public class FolioActivity
                 mEpubRawId, bookFileName);
         Publication.EXTENSION extension;
         String extensionString = null;
+
         try {
             extensionString = FileUtil.getExtensionUppercase(path);
             extension = Publication.EXTENSION.valueOf(extensionString);
@@ -466,8 +460,7 @@ public class FolioActivity
         int portNumber = getIntent().getIntExtra(Config.INTENT_PORT, Constants.PORT_NUMBER);
         r2StreamerServer = new Server(portNumber);
         r2StreamerServer.start();
-        r2StreamerServer.addEpub(pubBox.getPublication(), pubBox.getContainer(),
-                "/" + bookFileName, null);
+        r2StreamerServer.addEpub(pubBox.getPublication(), pubBox.getContainer(), "/" + bookFileName, null);
     }
 
     public void onBookInitFailure() {
@@ -475,7 +468,6 @@ public class FolioActivity
     }
 
     public void onBookInitSuccess() {
-
         Publication publication = pubBox.getPublication();
         spine = publication.getSpine();
         setTitle(publication.getMetadata().getTitle());
@@ -498,8 +490,10 @@ public class FolioActivity
                 break;
             }
         }
-        if (searchUri == null)
+
+        if (searchUri == null) {
             searchUri = Uri.parse(Constants.LOCALHOST + bookFileName + "/search");
+        }
 
         configFolio();
     }
@@ -509,7 +503,11 @@ public class FolioActivity
         Log.v(LOG_TAG, "-> onDirectionChange");
 
         FolioPageFragment folioPageFragment = getCurrentFragment();
-        if (folioPageFragment == null) return;
+
+        if (folioPageFragment == null) {
+            return;
+        }
+
         entryReadPosition = folioPageFragment.getLastReadPosition();
         SearchItem searchItemVisible = folioPageFragment.searchItemVisible;
 
@@ -522,9 +520,14 @@ public class FolioActivity
         mFolioPageViewPager.setCurrentItem(currentChapterIndex);
 
         folioPageFragment = getCurrentFragment();
-        if (folioPageFragment == null) return;
-        if (searchItemVisible != null)
+
+        if (folioPageFragment == null) {
+            return;
+        }
+
+        if (searchItemVisible != null) {
             folioPageFragment.highlightSearchItem(searchItemVisible);
+        }
     }
 
     public void initDistractionFreeMode(Bundle savedInstanceState) {
@@ -536,13 +539,13 @@ public class FolioActivity
         hideSystemUI();
         showSystemUI();
 
-        distractionFreeMode = savedInstanceState != null &&
-                savedInstanceState.getBoolean(BUNDLE_DISTRACTION_FREE_MODE);
+        distractionFreeMode = savedInstanceState != null && savedInstanceState.getBoolean(BUNDLE_DISTRACTION_FREE_MODE);
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+
         Log.v(LOG_TAG, "-> onPostCreate");
 
         if (distractionFreeMode) {
@@ -561,13 +564,17 @@ public class FolioActivity
     @Override
     public int getTopDistraction() {
         int topDistraction = 0;
+
         if (!distractionFreeMode) {
             topDistraction = getStatusBarHeight();
-            if (actionBar != null)
+            if (actionBar != null) {
                 topDistraction += actionBar.getHeight();
+            }
         }
+
         topDistraction /= density;
         Log.v(LOG_TAG, "-> getTopDistraction = " + topDistraction);
+
         return topDistraction;
     }
 
@@ -581,10 +588,14 @@ public class FolioActivity
     @Override
     public int getBottomDistraction() {
         int bottomDistraction = 0;
-        if (!distractionFreeMode)
+
+        if (!distractionFreeMode) {
             bottomDistraction = appBarLayout.getNavigationBarHeight();
+        }
+
         bottomDistraction /= density;
         Log.v(LOG_TAG, "-> getBottomDistraction = " + bottomDistraction);
+
         return bottomDistraction;
     }
 
@@ -600,14 +611,19 @@ public class FolioActivity
         //Log.v(LOG_TAG, "-> getViewportRect");
 
         Rect viewportRect = new Rect(appBarLayout.getInsets());
-        if (distractionFreeMode)
+
+        if (distractionFreeMode) {
             viewportRect.left = 0;
+        }
+
         viewportRect.top = (int) (getTopDistraction() * density);
+
         if (distractionFreeMode) {
             viewportRect.right = displayMetrics.widthPixels;
         } else {
             viewportRect.right = displayMetrics.widthPixels - viewportRect.right;
         }
+
         viewportRect.bottom = displayMetrics.heightPixels - ((int) (getBottomDistraction() * density));
         return viewportRect;
     }
@@ -635,7 +651,6 @@ public class FolioActivity
 
     @Override
     public void toggleSystemUI() {
-
         if (distractionFreeMode) {
             showSystemUI();
         } else {
@@ -648,13 +663,14 @@ public class FolioActivity
 
         if (Build.VERSION.SDK_INT >= 16) {
             View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+            decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
         } else {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            if (appBarLayout != null)
+
+            if (appBarLayout != null) {
                 appBarLayout.setTopMargin(getStatusBarHeight());
+            }
+
             onSystemUiVisibilityChange(View.SYSTEM_UI_FLAG_VISIBLE);
         }
     }
@@ -686,8 +702,9 @@ public class FolioActivity
     public int getStatusBarHeight() {
         int result = 0;
         int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resourceId > 0)
+        if (resourceId > 0) {
             result = getResources().getDimensionPixelSize(resourceId);
+        }
         return result;
     }
 
@@ -698,6 +715,7 @@ public class FolioActivity
             entryReadPosition = null;
             return tempReadPosition;
         }
+
         return null;
     }
 
@@ -709,7 +727,6 @@ public class FolioActivity
      */
     @Override
     public boolean goToChapter(String href) {
-
         for (Link link : spine) {
             if (href.contains(link.getHref())) {
                 currentChapterIndex = spine.indexOf(link);
@@ -725,12 +742,12 @@ public class FolioActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (requestCode == RequestCode.SEARCH.value) {
             Log.v(LOG_TAG, "-> onActivityResult -> " + RequestCode.SEARCH);
 
-            if (resultCode == RESULT_CANCELED)
+            if (resultCode == RESULT_CANCELED) {
                 return;
+            }
 
             searchAdapterDataBundle = data.getBundleExtra(SearchAdapter.DATA_BUNDLE);
             searchQuery = data.getCharSequenceExtra(SearchActivity.BUNDLE_SAVE_SEARCH_QUERY);
@@ -748,15 +765,11 @@ public class FolioActivity
                 folioPageFragment.highlightSearchItem(searchItem);
                 searchItem = null;
             }
-
-        } else if (requestCode == RequestCode.CONTENT_HIGHLIGHT.value && resultCode == RESULT_OK &&
-                data.hasExtra(TYPE)) {
-
+        } else if (requestCode == RequestCode.CONTENT_HIGHLIGHT.value && resultCode == RESULT_OK && data.hasExtra(TYPE)) {
             String type = data.getStringExtra(TYPE);
 
             if (type.equals(CHAPTER_SELECTED)) {
                 goToChapter(data.getStringExtra(SELECTED_CHAPTER_POSITION));
-
             } else if (type.equals(HIGHLIGHT_SELECTED)) {
                 HighlightImpl highlightImpl = data.getParcelableExtra(HIGHLIGHT_ITEM);
                 currentChapterIndex = highlightImpl.getPageNumber();
@@ -772,8 +785,9 @@ public class FolioActivity
     protected void onDestroy() {
         super.onDestroy();
 
-        if (outState != null)
+        if (outState != null) {
             outState.putParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE, lastReadPosition);
+        }
 
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         localBroadcastManager.unregisterReceiver(searchReceiver);
@@ -783,8 +797,9 @@ public class FolioActivity
             r2StreamerServer.stop();
         }
 
-        if (isFinishing())
+        if (isFinishing()) {
             localBroadcastManager.sendBroadcast(new Intent(FolioReader.ACTION_FOLIOREADER_CLOSED));
+        }
     }
 
     @Override
@@ -793,8 +808,8 @@ public class FolioActivity
     }
 
     private void configFolio() {
-
         mFolioPageViewPager = findViewById(R.id.folioPageViewPager);
+
         // Replacing with addOnPageChangeListener(), onPageSelected() is not invoked
         mFolioPageViewPager.setOnPageChangeListener(new DirectionalViewpager.OnPageChangeListener() {
             @Override
@@ -805,58 +820,55 @@ public class FolioActivity
             public void onPageSelected(int position) {
                 Log.v(LOG_TAG, "-> onPageSelected -> DirectionalViewpager -> position = " + position);
 
-                EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
-                        spine.get(currentChapterIndex).getHref(), false, true));
+                EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(spine.get(currentChapterIndex).getHref(), false, true));
                 mediaControllerFragment.setPlayButtonDrawable();
                 currentChapterIndex = position;
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
                 if (state == DirectionalViewpager.SCROLL_STATE_IDLE) {
                     int position = mFolioPageViewPager.getCurrentItem();
                     Log.v(LOG_TAG, "-> onPageScrollStateChanged -> DirectionalViewpager -> " +
                             "position = " + position);
 
-                    FolioPageFragment folioPageFragment =
-                            (FolioPageFragment) mFolioPageFragmentAdapter.getItem(position - 1);
+                    FolioPageFragment folioPageFragment = (FolioPageFragment) mFolioPageFragmentAdapter.getItem(position - 1);
+
                     if (folioPageFragment != null) {
                         folioPageFragment.scrollToLast();
-                        if (folioPageFragment.mWebview != null)
+                        if (folioPageFragment.mWebview != null) {
                             folioPageFragment.mWebview.dismissPopupWindow();
+                        }
                     }
 
                     folioPageFragment =
                             (FolioPageFragment) mFolioPageFragmentAdapter.getItem(position + 1);
                     if (folioPageFragment != null) {
                         folioPageFragment.scrollToFirst();
-                        if (folioPageFragment.mWebview != null)
+                        if (folioPageFragment.mWebview != null) {
                             folioPageFragment.mWebview.dismissPopupWindow();
+                        }
                     }
                 }
             }
         });
 
         mFolioPageViewPager.setDirection(direction);
-        mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(),
-                spine, bookFileName, mBookId);
+        mFolioPageFragmentAdapter = new FolioPageFragmentAdapter(getSupportFragmentManager(), spine, bookFileName, mBookId);
         mFolioPageViewPager.setAdapter(mFolioPageFragmentAdapter);
 
         // In case if SearchActivity is recreated due to screen rotation then FolioActivity
         // will also be recreated, so searchItem is checked here.
         if (searchItem != null) {
-
             currentChapterIndex = getChapterIndex(Constants.HREF, searchItem.getHref());
             mFolioPageViewPager.setCurrentItem(currentChapterIndex);
             FolioPageFragment folioPageFragment = getCurrentFragment();
             if (folioPageFragment == null) return;
             folioPageFragment.highlightSearchItem(searchItem);
             searchItem = null;
-
         } else {
-
             ReadPosition readPosition;
+
             if (savedInstanceState == null) {
                 readPosition = getIntent().getParcelableExtra(FolioActivity.EXTRA_READ_POSITION);
                 entryReadPosition = readPosition;
@@ -864,16 +876,15 @@ public class FolioActivity
                 readPosition = savedInstanceState.getParcelable(BUNDLE_READ_POSITION_CONFIG_CHANGE);
                 lastReadPosition = readPosition;
             }
+
             currentChapterIndex = getChapterIndex(readPosition);
             mFolioPageViewPager.setCurrentItem(currentChapterIndex);
         }
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(searchReceiver,
-                new IntentFilter(ACTION_SEARCH_CLEAR));
+        LocalBroadcastManager.getInstance(this).registerReceiver(searchReceiver, new IntentFilter(ACTION_SEARCH_CLEAR));
     }
 
     private int getChapterIndex(ReadPosition readPosition) {
-
         if (readPosition == null) {
             return 0;
         } else if (!TextUtils.isEmpty(readPosition.getChapterHref())) {
@@ -887,10 +898,12 @@ public class FolioActivity
         for (int i = 0; i < spine.size(); i++) {
             switch (caseString) {
                 case Constants.HREF:
-                    if (spine.get(i).getHref().equals(value))
+                    if (spine.get(i).getHref().equals(value)) {
                         return i;
+                    }
             }
         }
+
         return 0;
     }
 
@@ -920,7 +933,6 @@ public class FolioActivity
     }
 
     private void setConfig(Bundle savedInstanceState) {
-
         Config config;
         Config intentConfig = getIntent().getParcelableExtra(Config.INTENT_CONFIG);
         boolean overrideConfig = getIntent().getBooleanExtra(Config.EXTRA_OVERRIDE_CONFIG, false);
@@ -928,14 +940,12 @@ public class FolioActivity
 
         if (savedInstanceState != null) {
             config = savedConfig;
-
         } else if (savedConfig == null) {
             if (intentConfig == null) {
                 config = new Config();
             } else {
                 config = intentConfig;
             }
-
         } else {
             if (intentConfig != null && overrideConfig) {
                 config = intentConfig;
@@ -946,8 +956,9 @@ public class FolioActivity
 
         // Code would never enter this if, just added for any unexpected error
         // and to avoid lint warning
-        if (config == null)
+        if (config == null) {
             config = new Config();
+        }
 
         AppUtil.saveConfig(this, config);
         direction = config.getDirection();
@@ -955,14 +966,12 @@ public class FolioActivity
 
     @Override
     public void play() {
-        EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
-                spine.get(currentChapterIndex).getHref(), true, false));
+        EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(spine.get(currentChapterIndex).getHref(), true, false));
     }
 
     @Override
     public void pause() {
-        EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(
-                spine.get(currentChapterIndex).getHref(), false, false));
+        EventBus.getDefault().post(new MediaOverlayPlayPauseEvent(spine.get(currentChapterIndex).getHref(), false, false));
     }
 
     @Override
@@ -975,6 +984,7 @@ public class FolioActivity
                     Toast.makeText(this, getString(R.string.cannot_access_epub_message), Toast.LENGTH_LONG).show();
                     finish();
                 }
+
                 break;
         }
     }
@@ -990,8 +1000,10 @@ public class FolioActivity
             Log.v(LOG_TAG, "-> searchReceiver -> onReceive -> " + intent.getAction());
 
             String action = intent.getAction();
-            if (action == null)
+
+            if (action == null) {
                 return;
+            }
 
             switch (action) {
                 case ACTION_SEARCH_CLEAR:
@@ -1006,85 +1018,34 @@ public class FolioActivity
         Log.v(LOG_TAG, "-> resetSearchResults");
 
         ArrayList<Fragment> fragments = mFolioPageFragmentAdapter.getFragments();
+
         for (int i = 0; i < fragments.size(); i++) {
             FolioPageFragment folioPageFragment = (FolioPageFragment) fragments.get(i);
+
             if (folioPageFragment != null) {
                 folioPageFragment.resetSearchResults();
             }
         }
 
-        ArrayList<Fragment.SavedState> savedStateList =
-                mFolioPageFragmentAdapter.getSavedStateList();
+        ArrayList<Fragment.SavedState> savedStateList = mFolioPageFragmentAdapter.getSavedStateList();
+
         if (savedStateList != null) {
             for (int i = 0; i < savedStateList.size(); i++) {
                 Fragment.SavedState savedState = savedStateList.get(i);
                 Bundle bundle = FolioPageFragmentAdapter.getBundleFromSavedState(savedState);
-                if (bundle != null)
+                if (bundle != null) {
                     bundle.putParcelable(FolioPageFragment.BUNDLE_SEARCH_ITEM, null);
+                }
             }
         }
     }
 
     private FolioPageFragment getCurrentFragment() {
-
         if (mFolioPageFragmentAdapter != null && mFolioPageViewPager != null) {
-            return (FolioPageFragment) mFolioPageFragmentAdapter
-                    .getItem(mFolioPageViewPager.getCurrentItem());
+            return (FolioPageFragment) mFolioPageFragmentAdapter.getItem(mFolioPageViewPager.getCurrentItem());
         } else {
             return null;
         }
     }
-
-    @Override
-    public void onSupportActionModeStarted(@NonNull ActionMode mode) {
-        super.onSupportActionModeStarted(mode);
-    }
-
-    @Override
-    public void onActionModeStarted(android.view.ActionMode mode) {
-        super.onActionModeStarted(mode);
-    }
-
-    @Nullable
-    @Override
-    public android.view.ActionMode startActionMode(android.view.ActionMode.Callback callback) {
-        return super.startActionMode(callback);
-    }
-
-    @Nullable
-    @Override
-    public ActionMode onWindowStartingSupportActionMode(@NonNull ActionMode.Callback callback) {
-        return super.onWindowStartingSupportActionMode(callback);
-    }
-
-    @Nullable
-    @Override
-    public ActionMode startSupportActionMode(@NonNull ActionMode.Callback callback) {
-        return super.startSupportActionMode(callback);
-    }
-
-    @Nullable
-    @Override
-    public android.view.ActionMode startActionMode(android.view.ActionMode.Callback callback, int type) {
-        return super.startActionMode(callback, type);
-    }
-
-    @Nullable
-    @Override
-    public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback callback) {
-        return super.onWindowStartingActionMode(callback);
-    }
-
-    @Nullable
-    @Override
-    public android.view.ActionMode onWindowStartingActionMode(android.view.ActionMode.Callback callback, int type) {
-        return super.onWindowStartingActionMode(callback, type);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-    }
-
 
 }
