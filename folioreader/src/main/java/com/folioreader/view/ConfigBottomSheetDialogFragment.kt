@@ -3,7 +3,6 @@ package com.folioreader.view
 import android.animation.Animator
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
-import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
@@ -35,7 +34,8 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
 
     companion object {
         const val FADE_DAY_NIGHT_MODE = 500
-        @JvmField val LOG_TAG:String = ConfigBottomSheetDialogFragment::class.java.simpleName
+        @JvmField
+        val LOG_TAG: String = ConfigBottomSheetDialogFragment::class.java.simpleName
     }
 
     private lateinit var config: Config
@@ -76,6 +76,7 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
         configSeekBar()
         selectFont(config.font, false)
         isNightMode = config.isNightMode
+
         if (isNightMode) {
             container.setBackgroundColor(ContextCompat.getColor(context!!, R.color.night))
         } else {
@@ -96,7 +97,6 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun inflateView() {
-
         if (config.allowedDirection != Config.AllowedDirection.VERTICAL_AND_HORIZONTAL) {
             view5.visibility = View.GONE
             buttonVertical.visibility = View.GONE
@@ -151,9 +151,8 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun configFonts() {
+        val colorStateList = UiUtil.getColorList(config.themeColor, ContextCompat.getColor(context!!, R.color.grey_color))
 
-        val colorStateList = UiUtil.getColorList(config.themeColor,
-                ContextCompat.getColor(context!!, R.color.grey_color))
         buttonVertical.setTextColor(colorStateList)
         buttonHorizontal.setTextColor(colorStateList)
         view_config_font_andada.setTextColor(colorStateList)
@@ -189,7 +188,6 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun toggleBlackTheme() {
-
         val day = ContextCompat.getColor(context!!, R.color.white)
         val night = ContextCompat.getColor(context!!, R.color.night)
 
@@ -271,10 +269,10 @@ class ConfigBottomSheetDialogFragment : BottomSheetDialogFragment() {
     }
 
     private fun setAudioPlayerBackground() {
-
-        var mediaControllerFragment: Fragment? = fragmentManager?.
-                findFragmentByTag(MediaControllerFragment.LOG_TAG) ?: return
+        var mediaControllerFragment: Fragment? = fragmentManager?.findFragmentByTag(MediaControllerFragment.LOG_TAG)
+                ?: return
         mediaControllerFragment = mediaControllerFragment as MediaControllerFragment
+
         if (isNightMode) {
             mediaControllerFragment.setDayMode()
         } else {
