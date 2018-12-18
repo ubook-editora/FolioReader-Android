@@ -10,6 +10,7 @@ install {
                 packaging 'aar'
                 groupId publishedGroupId
                 artifactId artifact
+                version '0.5.1.internal'
 
                 // Add your description here
                 name libraryName
@@ -34,7 +35,6 @@ install {
                     connection gitUrl
                     developerConnection gitUrl
                     url siteUrl
-
                 }
             }
         }

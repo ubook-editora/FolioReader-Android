@@ -1,4 +1,5 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven-publish'
 apply from: '../config/quality/quality.gradle'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'kotlin-android'
@@ -69,6 +70,7 @@ android {
         exclude 'META-INF/dependencies.txt'
         exclude 'META-INF/LGPL2.1'
         exclude 'META-INF/services/javax.annotation.processing.Processor'
+        exclude 'META-INF/nanohttpd/default-mimetypes.properties'
     }
 
     lintOptions {
@@ -82,6 +84,7 @@ android {
 }
 
 apply from: '../folioreader/bintray/installv1.gradle'
+
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
@@ -112,4 +115,5 @@ dependencies {
     // To use only ReflectionUtils in Spring framework
     implementation 'org.springframework:spring-core:4.3.19.RELEASE'
 }
+
 apply from: '../folioreader/bintray/bintrayv1.gradle'
